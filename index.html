@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Countdown Timer</title>
+<style>
+    body {
+        font-family: Segoe UI, sans-serif;
+        color: lightgrey;
+        text-align: center;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-color: black;
+        position: relative;
+    }
+    #countdownContainer {
+        position: relative;
+    }
+    #countdown {
+        font-size: 30em; /* 3 times bigger */
+        line-height: 1;
+        position: relative;
+        z-index: 1;
+    }
+    #readyMessage {
+        font-size: 30em; /* Same size as countdown */
+        line-height: 1;
+    }
+    #quoteContainer {
+        position: fixed;
+        bottom: 0;
+        right: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        padding: 10px;
+        width: 100%; /* Make the background bar full screen width */
+        z-index: 2;
+    }
+    #quote {
+        color: white;
+        font-size: 24px;
+    }
+    #annataLogo {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        width: 100px; /* Adjust the size as needed */
+        height: auto;
+        z-index: 2;
+    }
+</style>
+</head>
+<body>
+<img id="annataLogo" src="https://annata.net/wp-content/uploads/2023/12/Annata-hinge-top-150x150.png">
+<div id="countdownContainer">
+    <div id="countdown"></div>
+</div>
+<div id="readyMessage"></div>
+<div id="quoteContainer">
+    <div id="quote"></div>
+</div>
+<div id="inputs">
+    <label for="imageOption">Choose background image option:</label><br>
+    <select id="imageOption">
+        <option value="previous">Use previous background image</option>
+        <option value="new">Select a new background image</option>
+        <option value="default">Use default background image</option>
+        <option value="none">Do not use a background image</option>
+    </select><br><br>
+    <div id="imageUrlInputContainer" style="display: none;">
+        <input type="text" id="imageUrlInput" placeholder="Enter image URL">
+    </div>
+    <input type="number" id="minutesInput" placeholder="Enter minutes">
+    <input type="number" id="secondsInput" placeholder="Enter seconds">
+    <button id="startButton">Start Countdown</button>
+</div>
+<script>
+    function startCountdown() {
+        var imageOption = document.getElementById("imageOption").value;
+        var imageUrl = '';
+        if (imageOption === "new") {
+            imageUrl = document.getElementById("imageUrlInput").value;
+            localStorage.setItem("backgroundImageUrl", imageUrl);
+            document.body.style.backgroundImage = "url('" + imageUrl + "')";
+        } else if (imageOption === "default") {
+            imageUrl = "default.gif";
+            document.body.style.backgroundImage = "url('" + imageUrl + "')";
+        } else if (imageOption === "previous") {
+            imageUrl = localStorage.getItem("backgroundImageUrl");
+        } else {
+            // Clear background image
+            document.body.style.backgroundImage = "none";
+            localStorage.removeItem("backgroundImageUrl");
+        }
+        
+        var minutes = document.getElementById("minutesInput").value || 0;
+        var seconds = document.getElementById("secondsInput").value || 0;
+        
+        localStorage.setItem("minutes", minutes);
+        localStorage.setItem("seconds", seconds);
+        
+        var totalSeconds = parseInt(minutes) * 60 + parseInt(seconds);
+        var countdown = document.getElementById('countdown');
+        countdown.style.display = "block"; // Ensure the countdown is visible
+        
+        var interval = setInterval(function() {
+            var minutes = Math.floor(totalSeconds / 60);
+            var seconds = totalSeconds % 60;
+            countdown.textContent = pad(minutes) + ":" + pad(seconds);
+            if (totalSeconds % 4 === 0) {
+                var randomColor = getRandomDarkColor();
+                document.body.style.backgroundColor = randomColor;
+            }
+            if (totalSeconds <= 0) {
+                clearInterval(interval);
+                countdown.style.display = "none"; // Hide countdown
+                var readyMessage = document.getElementById('readyMessage');
+                readyMessage.textContent = "Ready?";
+                readyMessage.style.display = "block"; // Ensure the ready message is visible
+            } else {
+                totalSeconds--;
+            }
+        }, 1000);
+
+        // Hide input fields and button
+        document.getElementById('inputs').style.display = "none";
+
+        // Show the first quote immediately
+        updateQuote();
+
+        // Change quote every 10 seconds
+        setInterval(updateQuote, 10000);
+    }
+
+    function updateQuote() {
+        var quotes = [
+            "Embrace digital transformation for business growth.",
+            "Innovate your processes to stay ahead in the digital age.",
+            "Transform your operations to meet modern challenges.",
+            "Leverage technology for a more efficient future.",
+            "Stay agile and adapt to the evolving digital landscape.",
+            "Unlock new opportunities with digital transformation.",
+            "Empower your team with digital tools and strategies.",
+            "Drive digital change for long-term success.",
+            "Customer experience is key in digital transformation.",
+            "Integrate digital solutions for seamless operations.",
+            "Harness data insights to drive strategic decisions.",
+            "Stay ahead with digital innovation and creativity.",
+            "Digitize your business processes for efficiency and agility.",
+            "Embrace digital transformation to thrive in the modern era.",
+            "Adapt and evolve with the power of digital technology.",
+            "Break down silos to enable digital collaboration.",
+            "Anticipate change and embrace digital evolution.",
+            "Transform your mindset to drive digital progress.",
+            "Innovate with digital solutions for competitive advantage.",
+            "Unlock new possibilities with digital transformation.",
+            "Embrace digital tools to enhance productivity.",
+            "Integrate digital solutions seamlessly into your workflow.",
+            "Empower your workforce with digital capabilities.",
+            "Stay agile and adapt to digital disruption.",
+            "Transform your business for the digital age.",
+            "Embrace digital innovation for business success.",
+            "Drive digital change with strategic planning.",
+            "Unlock new opportunities with digital transformation.",
+            "Empower your team with the right digital tools.",
+            "Transform your processes with digital solutions.",
+            "Stay ahead with continuous digital innovation.",
+            "Embrace digital transformation for long-term growth.",
+            "Leverage digital technologies for a competitive edge.",
+            "Break down barriers with digital collaboration.",
+            "Transform your business model with digital technology.",
+            "Embrace digital transformation to drive change.",
+            "Innovate your operations with digital solutions.",
+            "Harness the power of data for digital insights.",
+            "Embrace digital change for a brighter future.",
+            "Integrate digital solutions for efficiency and agility.",
+            "Empower your workforce with digital skills.",
+            "Transform your business with digital innovation.",
+            "Stay ahead of the curve with digital transformation.",
+            "Embrace digital disruption for growth and success.",
+            "Unlock new opportunities with digital technologies.",
+            "Drive digital change with a forward-thinking mindset.",
+            "Transform your organization with digital capabilities.",
+            "Embrace digital transformation to stay relevant.",
+            "Innovate your strategy with digital solutions.",
+            "Break down silos with digital collaboration.",
+            "Anticipate change and embrace digital evolution."
+        ];
+
+        var quote = document.getElementById("quote");
+        var index = Math.floor(Math.random() * quotes.length);
+        quote.textContent = quotes[index];
+    }
+
+    function pad(val) {
+        return val < 10 ? "0" + val : val;
+    }
+
+    function getRandomDarkColor() {
+        var colors = ["#330000", "#330000", "#330000", "#222", "#444", "#666"];
+        var randomIndex = Math.floor(Math.random() * colors.length);
+        return colors[randomIndex];
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        var imageUrl = localStorage.getItem("backgroundImageUrl");
+        if (imageUrl) {
+            document.body.style.backgroundImage = "url('" + imageUrl + "')";
+        }
+        var minutes = localStorage.getItem("minutes") || 0;
+        var seconds = localStorage.getItem("seconds") || 0;
+        document.getElementById("minutesInput").value = minutes;
+        document.getElementById("secondsInput").value = seconds;
+
+        document.getElementById("startButton").addEventListener("click", startCountdown);
+
+        document.getElementById("imageOption").addEventListener("change", function() {
+            var option = this.value;
+            var imageUrlInputContainer = document.getElementById("imageUrlInputContainer");
+            if (option === "new" || option === "default") {
+                imageUrlInputContainer.style.display = "block";
+            } else {
+                imageUrlInputContainer.style.display = "none";
+            }
+        });
+
+        // Initialize image URL input container visibility
+        var option = document.getElementById("imageOption").value;
+        var imageUrlInputContainer = document.getElementById("imageUrlInputContainer");
+        if (option === "new" || option === "default") {
+            imageUrlInputContainer.style.display = "block";
+        } else {
+            imageUrlInputContainer.style.display = "none";
+        }
+    });
+</script>
+</body>
+</html>
